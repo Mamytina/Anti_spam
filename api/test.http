@@ -1,0 +1,6 @@
+POST http://127.0.0.1:8000/api/predict/
+Content-Type: application/json
+
+{
+  "text": "Goui bien sur je viendrais !!!"
+}
