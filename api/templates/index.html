@@ -1,60 +1,208 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Spam Detector</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spam Detector Pro</title>
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial;
-            text-align: center;
-            margin-top: 50px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #667eea;
+            display: inline-block;
+            padding-bottom: 5px;
         }
 
         textarea {
-            width: 400px;
-            height: 120px;
-            font-size: 16px;
+            width: 100%;
+            padding: 15px;
+            font-size: 15px;
+            font-family: inherit;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         button {
-            padding: 10px 20px;
-            margin-top: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 25px;
             cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
         }
 
         #result {
-            margin-top: 20px;
-            font-size: 24px;
-            font-weight: bold;
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .spam {
-            color: red;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(238, 90, 36, 0.3);
         }
 
         .ham {
-            color: green;
+            background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(86, 171, 47, 0.3);
+        }
+
+        .loading {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .confidence {
+            font-size: 14px;
+            font-weight: normal;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+
+        .stats {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            #result {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
 
 <body>
+    <div class="container">
+        <h1>🛡️ Détecteur de Spam</h1>
+        <div class="subtitle">Analyse intelligente de vos messages</div>
+        
+        <textarea id="text" placeholder="Écrivez votre message ici... (ex: Gagnez 1000€ par jour, cliquez ici !)"></textarea>
+        <br>
+        
+        <button onclick="checkSpam()">
+            🔍 Analyser le message
+        </button>
+        
+        <div id="result"></div>
+        <div class="stats">
+            ⚡ Analyse instantanée | 🔒 100% privé
+        </div>
+    </div>
 
-    <h1>Détecteur de Spam</h1>
-
-    <textarea id="text" placeholder="Écris ton message ici..."></textarea>
-    <br>
-
-    <button onclick="checkSpam()">Tester</button>
-
-    <div id="result"></div>
-
-   <script>
+    <script>
         async function checkSpam() {
-            const text = document.getElementById("text").value;
+            const textarea = document.getElementById("text");
+            const text = textarea.value.trim();
             const resultDiv = document.getElementById("result");
 
-            resultDiv.innerText = "Analyse en cours...";
+            // Validation du texte
+            if (!text) {
+                resultDiv.innerHTML = `
+                    <div>⚠️ Veuillez écrire un message</div>
+                    <div class="confidence">Le champ ne peut pas être vide</div>
+                `;
+                resultDiv.className = "loading";
+                return;
+            }
+
+            // Animation de chargement
+            resultDiv.innerHTML = `
+                <div>⏳ Analyse en cours...</div>
+                <div class="confidence">Traitement du message</div>
+            `;
+            resultDiv.className = "loading";
 
             try {
                 const response = await fetch("/predict/", {
@@ -65,27 +213,62 @@
                     body: JSON.stringify({ text: text })
                 });
 
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP ${response.status}`);
+                }
+
                 const data = await response.json();
-
-                let label = data.result.toUpperCase();
-                let confidence = data.confidence;
-
-                if (data.result === "spam") {
-                    resultDiv.innerHTML =
-                        "SPAM (" + confidence + "%)";
+                
+                let confidenceValue = data.confidence;
+                let isSpam = data.result === "spam";
+                
+                // Formater la confiance
+                if (typeof confidenceValue === 'number') {
+                    confidenceValue = confidenceValue.toFixed(1);
+                }
+                
+                // Afficher le résultat avec une animation
+                if (isSpam) {
+                    resultDiv.innerHTML = `
+                        <div>🚨 SPAM DÉTECTÉ 🚨</div>
+                        <div class="confidence">Confiance : ${confidenceValue}%</div>
+                        <div class="confidence" style="font-size: 12px; margin-top: 10px;">⚠️ Ce message semble suspect</div>
+                    `;
                     resultDiv.className = "spam";
                 } else {
-                    resultDiv.innerHTML =
-                        "NON SPAM (" + confidence + "%)";
+                    // Sélection d'un message au hasard pour les messages légitimes
+                    const safeMessages = [
+                        "✅ Message légitime",
+                        "📧 Non spam",
+                        "✨ Message sûr",
+                        "🔒 Contenu fiable"
+                    ];
+                    const randomMessage = safeMessages[Math.floor(Math.random() * safeMessages.length)];
+                    
+                    resultDiv.innerHTML = `
+                        <div>${randomMessage}</div>
+                        <div class="confidence">Confiance : ${confidenceValue}%</div>
+                        <div class="confidence" style="font-size: 12px; margin-top: 10px;">✓ Ce message semble sûr</div>
+                    `;
                     resultDiv.className = "ham";
                 }
 
             } catch (error) {
-                resultDiv.innerText = "Erreur serveur";
+                console.error("Erreur:", error);
+                resultDiv.innerHTML = `
+                    <div>❌ Erreur serveur</div>
+                    <div class="confidence">Vérifiez votre connexion</div>
+                `;
                 resultDiv.className = "spam";
             }
         }
-  </script>
 
+        // Ajouter la possibilité d'envoyer avec Ctrl+Entrée
+        document.getElementById("text").addEventListener("keydown", function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                checkSpam();
+            }
+        });
+    </script>
 </body>
 </html>
